@@ -17,7 +17,7 @@ if dbconfig['type']=="mariadb":
                                                                       dbconfig['database'])
 
 logging.debug(link)
-engine = create_engine(link, echo=True)
+engine = create_engine(link, echo=False)
 db_session = scoped_session(
         sessionmaker(
             bind=engine,

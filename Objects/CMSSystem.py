@@ -8,7 +8,6 @@ class CMSSytem(Base):
 
     # Every SQLAlchemy table should have a primary key named 'id'
     system_id = Column(Integer, primary_key=True)
-
     system_name = Column(String(255))
     system_type = Column(String(255))
     system_project_id = Column(Integer, ForeignKey('tab_project.project_id'))

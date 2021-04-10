@@ -13,6 +13,7 @@ class Project(Base):
     project_name = Column(String(255))
     project_site = Column(String(255))
     project_country = Column(String(255))
+    project_environment = Column(String(32))
     project_description = Column(Text)
     
     
