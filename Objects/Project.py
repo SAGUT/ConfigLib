@@ -15,7 +15,9 @@ class Project(Base):
     project_country = Column(String(255))
     project_environment = Column(String(32))
     project_description = Column(Text)
-    
+    projekt_type= Column(String(255))
+    projekt_application= Column(String(255))
+    projekt_site_id= Column(String(255))
     
 
     # Lets us print out a user object conveniently.

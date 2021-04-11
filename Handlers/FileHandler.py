@@ -1,5 +1,5 @@
 import logging
-from .LibFrame import applicationDict
+from ..LibFrame import applicationDict
 from pathlib import Path
 import os
 class FileHandler(object):
