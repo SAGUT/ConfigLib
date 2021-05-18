@@ -5,20 +5,20 @@ from ..CMSSystem import System
 from ...Database import Base
 
 # Our User object, mapped to the 'users' table
-class DDAU3(System):
-    __tablename__ = 'tab_ddau3'
+class SPMLarge(System):
+    __tablename__ = 'tab_spml'
 
     # Every SQLAlchemy table should have a primary key named 'id'
-    ddau_id = Column(Integer, primary_key=True)
-    ddau_system_id = Column(Integer,ForeignKey('tab_system.system_id'))
-    ddau_ip = Column(String(255))
+    spml_id = Column(Integer, primary_key=True)
+    spml_system_id = Column(Integer,ForeignKey('tab_system.system_id'))
+    spml_ip = Column(String(255))
     
     __mapper_args__ = {
-        'polymorphic_identity':'ddau3',
+        'polymorphic_identity':'spmlarge',
     }
     
 
     # Lets us print out a user object conveniently.
     def __repr__(self):
        return "<Project(ddau_id='%s', ddau_name='%s')>" % (
-                               self.ddau_id, self.ddau_name)
+                               self.spml_system_id, self.system_name)

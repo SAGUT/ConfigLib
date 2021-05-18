@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 from sqlalchemy import Column, Integer, String, ForeignKey,Text
+from sqlalchemy.orm import relationship
 #from Application.database import Base, db_session, engine
 from ..Database import Base
 from .BKV.DDAU3 import DDAU3
@@ -19,7 +20,7 @@ class Project(Base):
     projekt_application= Column(String(255))
     projekt_site_id= Column(String(255))
     
-
+    systems = relationship("System", back_populates="project")
     # Lets us print out a user object conveniently.
     def __repr__(self):
        return "<Project(project_name='%s', project_site='%s', project_country'%s')>" % (
