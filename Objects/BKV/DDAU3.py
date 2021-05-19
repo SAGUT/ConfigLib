@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 from sqlalchemy import Column, Integer, String, ForeignKey,Text
-from ..CMSSystem import System
+from ..System import System
 #from Application.ConfigLib.LibFrame import applicationDict      # .database import Base
 from ...Database import Base
 
@@ -20,5 +20,4 @@ class DDAU3(System):
 
     # Lets us print out a user object conveniently.
     def __repr__(self):
-       return "<Project(ddau_id='%s', ddau_name='%s')>" % (
-                               self.ddau_id, self.ddau_name)
+       return "<Project(ddau_id='%s', ddau_name='%s')>" % ( self.ddau_id, self.ddau_name)

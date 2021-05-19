@@ -13,8 +13,12 @@ class System(Base):
     system_type = Column(String(255))
     system_project_id = Column(Integer, ForeignKey('tab_project.project_id'))
     system_description = Column(Text)
+    system_azureid = Column(String(255))
+    system_environment = Column(String(255))
+    system_supplier = Column(String(255))
     project = relationship("Project", back_populates="systems")
-
+    channels = relationship("Channel", back_populates="system")
+    
     __mapper_args__ = {
         'polymorphic_identity':'system',
         'polymorphic_on':system_type
