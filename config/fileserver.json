@@ -1,0 +1,3 @@
+{
+    "subdirs":["reports","configuration","data","data/scalar","data/twf","data/spectra","plots","plots/scalar","plots/nonscalar","reports/status"]
+}
