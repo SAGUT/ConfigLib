@@ -13,6 +13,7 @@ from ..Objects.Channel import Channel
 from ..Objects.Signals import Signal,CalculatedSignal
 from ..Objects.Sensor import Sensor,AccelerationSensor
 from ..Objects.Mapping import Mapping
+from ..Objects.SourceSignal import SourceSignal
 class CMSDB(object):
 
     def __init__(self):
@@ -53,7 +54,11 @@ class CMSDB(object):
         
         return projects
     
+    def getProject(self,projectid):
+        return Project.query.get(projectid)
 
+    def getSystem(self,systemid):
+        return System.query.get(systemid)
 
     #CMS handling
     def addCMSSystem(self,cmssystem):

@@ -20,4 +20,4 @@ class DDAU3(System):
 
     # Lets us print out a user object conveniently.
     def __repr__(self):
-       return "<Project(ddau_id='%s', ddau_name='%s')>" % ( self.ddau_id, self.ddau_name)
+       return "<DDAU3(ddau_id='%s', ddau_name='%s')>" % ( self.ddau_id, self.ddau_ip)
