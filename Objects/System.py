@@ -16,6 +16,9 @@ class System(Base):
     system_azureid = Column(String(255))
     system_environment = Column(String(255))
     system_supplier = Column(String(255))
+    system_batchagg_id= Column(String(255))
+    system_rtagg_id= Column(String(255))
+    system_nonscalarbatchagg_id= Column(String(255))
     project = relationship("Project", back_populates="systems")
     channels = relationship("Channel", back_populates="system")
     

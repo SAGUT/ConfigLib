@@ -65,6 +65,25 @@ class CMSDB(object):
         db_session.add(cmssystem)
         db_session.commit()
         return cmssystem
+    #sourcesignal handling
+    def upsertSourceSignal(self,sourcesignal):
+        #exists = db_session.query(exists().where(SourceSignal.sourcesignal_azureid == sourcesignal.sourcesignal_azureid)).scalar()
+        exists = db_session.query(
+                db_session.query(SourceSignal).filter_by(sourcesignal_azureid= sourcesignal.sourcesignal_azureid).exists()
+                ).scalar()
+        if exists:
+            print("found it")
+        else:
+            print("make it new")
+            db_session.add(sourcesignal)
+        db_session.commit()
+    
+    def getSourceSignal(self,systemid):
+        ssignals=db_session.query(SourceSignal).filter(SourceSignal.sourcesignal_systemid==systemid)
+        return ssignals 
 
+    def deleteSourceSignal(self,signalid):
+        db_session.query(SourceSignal).filter(SourceSignal.sourcesignal_id==signalid).delete()
+        db_session.commit()
     #BKV handling
 

@@ -4,6 +4,7 @@ import json
 import requests
 import time
 import urllib.parse
+from ..Objects.SourceSignal import SourceSignal
 class AzureAPI(object):
     '''
     classdocs
@@ -60,3 +61,62 @@ class AzureAPI(object):
         token=response.json()
         
         return token
+
+    def getSourceSignals(self,moduleid,systemdbid):
+        #start=time.time()
+        flsobjects=dict()
+        levelstring=""
+        page=1
+        hasMore=True
+        counter=1
+        while(hasMore):
+            try:
+                
+                url=self.baseurl+self.defaultversion+"sourcesignals?page={0}&pageSize={1}&parentId={2}".format(page,100,moduleid)
+                #print(url)
+                access_token=self.getToken()
+                headers = {'Authorization': 'Bearer ' + access_token}
+                jsonresult = requests.get(url, headers=headers).json()
+                #print(jsonresult)
+                if 'totalCount' in jsonresult:
+                    
+                    totalcount=jsonresult['totalCount']
+                    if counter<=totalcount:
+                        print("reached max count:",counter,totalcount)
+                        hasMore=True
+                    
+                        for objecte in jsonresult['sourceSignals']:
+                            
+                            flsobjects[objecte["id"]]=SourceSignal(
+                                                            sourcesignal_azureid= objecte['id'],
+                                                            sourcesignal_name= objecte['name'],
+                                                            sourcesignal_description= objecte['description'],
+                                                            sourcesignal_type= objecte['type'],
+                                                            sourcesignal_realTime= objecte['realTime'],
+                                                            sourcesignal_measurementType= objecte['measurementType'],
+                                                            sourcesignal_sourceUnit= objecte['sourceUnit'],
+                                                            sourcesignal_sourceIdentifier= objecte['sourceIdentifier'],
+                                                            sourcesignal_systemHigh= objecte['systemHigh'],
+                                                            sourcesignal_systemLow= objecte['systemLow'],
+                                                            sourcesignal_parentId= objecte['parentId'],
+                                                            sourcesignal_designation= objecte['designation'],
+                                                            sourcesignal_metadata= json.dumps(objecte['metadata']),
+                                                            sourcesignal_channel= None,
+                                                            sourcesignal_systemid=systemdbid
+                                                            )
+                            #print(counter,objecte,objecte["id"])
+                            counter+=1
+                    else:
+                        hasMore=False
+                
+                page=page+1
+                
+                
+                
+            except Exception as e:
+                print("getSourceSignals error",str(e))
+                if page>1:
+                    page=page-1
+                else:
+                    page=1
+        return flsobjects

@@ -20,7 +20,7 @@ class SourceSignal(Base):
     sourcesignal_parentId= Column(String(255))
     sourcesignal_designation= Column(Text)
     sourcesignal_metadata= Column(Text)
-    sourcesignal_channel= Column(String(255))
+    sourcesignal_channel= Column(Integer, ForeignKey('tab_channel.channel_id'),nullable=True)
     sourcesignal_systemid= Column(Integer, ForeignKey('tab_system.system_id'))
     # Lets us print out an object conveniently.
     def __repr__(self):
