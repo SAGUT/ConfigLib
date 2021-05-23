@@ -1,6 +1,7 @@
 import logging
 import json
 import os
+from pathlib import Path
 from ..LibFrame import applicationDict
 from smb.SMBConnection import SMBConnection
 import socket
@@ -15,7 +16,7 @@ class FileServer(object):
         logging.debug(self.clientname)
         
     def getServerConnection(self):
-        conn = SMBConnection(self.config['shareuser'],self.config['sharepwd'],self.clientname,self.config['server_name'],self.config['domain']) 
+        conn = SMBConnection(self.config['shareuser'],self.config['sharepwd'],self.clientname,self.config['server_name'],"WORKGROUP") 
         return conn
 
     def initFileShare(self):
@@ -53,6 +54,33 @@ class FileServer(object):
         except Exception as e:
             logging.error(str(e))
 
+    def storeBKVTemplate(self,application,filelink):
+        p = Path(filelink)
+        try:
+            conn = self.getServerConnection()
+            conn.connect(self.config['server_ip'],445)
+            newdir="CMSData/BKVModels".format()
+            self.checkNCreate(conn,newdir)
+            newdir="CMSData/BKVModels/{0}".format(application)
+            self.checkNCreate(conn,newdir)
+            file_obj=open(filelink,"r")
+            templatedata=json.load(file_obj)
+            file_obj.close()
+            template_id=templatedata["heading"][0]["template_id"]
+            logging.debug("templat id: "+str(template_id))
+            newdir="CMSData/BKVModels/{0}/{1}".format(application,template_id)
+            self.checkNCreate(conn,newdir)
+            
+            path=newdir+"/"+p.name
+            with open(p, 'rb') as file_obj:
+                conn.storeFile(service_name=self.config['sharename'],  # It's the name of shared folder
+                        path=path,
+                        file_obj=file_obj)
+            
+            conn.close()
+
+        except Exception as e:
+            logging.error(str(e))
     
     def checkNCreate(self,conn,sourcedir):
         temp=str(sourcedir).split("/")

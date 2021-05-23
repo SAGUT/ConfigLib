@@ -23,7 +23,7 @@ class Signal(Base):
 
     # Lets us print out a user object conveniently.
     def __repr__(self):
-       return "<Project(signal_name='%s', signal_type='%s', signal_description'%s')>" % (self.signal_name, self.signal_type, self.signal_description)
+       return "<Signal(signal_name='%s', signal_type='%s', signal_description'%s')>" % (self.signal_name, self.signal_type, self.signal_description)
 
 class CalculatedSignal(Signal):
     __tablename__ = 'tab_calculated_signal'

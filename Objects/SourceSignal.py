@@ -11,7 +11,7 @@ class SourceSignal(Base):
     sourcesignal_name= Column(String(255))
     sourcesignal_description= Column(String(255))
     sourcesignal_type= Column(String(255))
-    sourcesignal_realTime= Column(Boolean)
+    sourcesignal_realTime = Column(Boolean)
     sourcesignal_measurementType= Column(String(255))
     sourcesignal_sourceUnit= Column(String(255))
     sourcesignal_sourceIdentifier= Column(String(255))
