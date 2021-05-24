@@ -16,7 +16,7 @@ class Channel(Base):
     #channel_related_channel = Column(Integer, ForeignKey('tab_channel.channel_id'), nullable=True)
     channel_description = Column(Text)
     system = relationship("System", back_populates="channels")
-    signals = relationship("Signal", back_populates="channel")
+    #signals = relationship("Signal", back_populates="channel")
     sensor= relationship("Sensor", back_populates="channel")
     
     __mapper_args__ = {

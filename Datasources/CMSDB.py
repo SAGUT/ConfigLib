@@ -10,7 +10,7 @@ from ..Objects.System import System
 from ..Objects.BKV.DDAU3 import DDAU3
 from ..Objects.SPM.SPMSystems import SPMLarge
 from ..Objects.Channel import Channel
-from ..Objects.Signals import Signal,CalculatedSignal
+from ..Objects.Signals import CalculatedSignal
 from ..Objects.Sensor import Sensor,AccelerationSensor
 from ..Objects.Mapping import Mapping
 from ..Objects.SourceSignal import SourceSignal
@@ -81,9 +81,29 @@ class CMSDB(object):
     def getSourceSignal(self,systemid):
         ssignals=db_session.query(SourceSignal).filter(SourceSignal.sourcesignal_systemid==systemid)
         return ssignals 
-
+    
+    def getSourceSignalByAzureID(self,azureid):
+        logging.debug("query Sourcesignal: "+azureid)
+        querystr="sourcesignal_azureid='{0}'".format(azureid)
+        signal=db_session.query(SourceSignal).filter(text(querystr)).one()
+        
+        return signal
+    
     def deleteSourceSignal(self,signalid):
         db_session.query(SourceSignal).filter(SourceSignal.sourcesignal_id==signalid).delete()
+        db_session.commit()
+    
+    #sourcesignal handling
+    def upsertCalculatedSignal(self,calcsignal):
+        #exists = db_session.query(exists().where(SourceSignal.sourcesignal_azureid == sourcesignal.sourcesignal_azureid)).scalar()
+        exists = db_session.query(
+                db_session.query(CalculatedSignal).filter_by(signal_azureid= calcsignal.signal_azureid).exists()
+                ).scalar()
+        if exists:
+            print("found it")
+        else:
+            print("make it new")
+            db_session.add(calcsignal)
         db_session.commit()
     #BKV handling
 

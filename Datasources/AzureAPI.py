@@ -120,3 +120,46 @@ class AzureAPI(object):
                 else:
                     page=1
         return flsobjects
+
+    def getCalclatedSignals(self,moduleid):
+        #start=time.time()
+        flsobjects=dict()
+        levelstring=""
+        page=1
+        hasMore=True
+        counter=1
+        while(hasMore):
+            try:
+                
+                url=self.baseurl+self.defaultversion+"calculatedSignals?page={0}&pageSize={1}&moduleId={2}".format(page,100,moduleid)
+                #print(url)
+                access_token=self.getToken()
+                headers = {'Authorization': 'Bearer ' + access_token}
+                jsonresult = requests.get(url, headers=headers).json()
+                #print(jsonresult)
+                if 'totalCount' in jsonresult:
+                    
+                    totalcount=jsonresult['totalCount']
+                    if counter<=totalcount:
+                        print("reached max count:",counter,totalcount)
+                        hasMore=True
+                    
+                        for objecte in jsonresult['calculatedSignalResponses']:
+                            
+                            flsobjects[objecte["id"]]=objecte
+                            
+                            counter+=1
+                    else:
+                        hasMore=False
+                
+                page=page+1
+                
+                
+                
+            except Exception as e:
+                print("getCalclatedSignals error",str(e))
+                if page>1:
+                    page=page-1
+                else:
+                    page=1
+        return flsobjects
