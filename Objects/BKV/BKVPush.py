@@ -10,12 +10,11 @@ class BKVPush(Base):
     # Every SQLAlchemy table should have a primary key named 'id'
     bkvpush_id = Column(Integer, primary_key=True)
     bkvpush_templateid = Column(Integer,ForeignKey('tab_bkv_template.bkvtemplate_id'))
-    bkvpush_id = Column(String(255))
+    bkvpush_bkvid = Column(String(255))
     bkvpush_trigger = Column(String(255))
     bkvpush_trigger_data_timer = Column(Integer)
     bkvpush_target = Column(String(255))
     bkvpush_target_data_trigger = Column(String(255))
-    bkvpush_target = Column(String(255))
     bkvpush_config_secure= Column(Boolean)
     bkvpush_config_refid = Column(String(255))
     bkvpush_config_page = Column(String(255))
@@ -29,4 +28,4 @@ class BKVPush(Base):
 
     # Lets us print out a user object conveniently.
     def __repr__(self):
-       return "<BKVTemplate(bkvtemplate_id='%s', bkvtemplate_name='%s')>" % (self.bkvtemplate_id, self.bkvtemplate_name)
+       return "<BKVPush(bkvpush_id='%s', bkvpush_id='%s')>" % (self.bkvpush_id, self.bkvpush_id)

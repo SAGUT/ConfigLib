@@ -56,6 +56,7 @@ class FileServer(object):
 
     def storeBKVTemplate(self,application,filelink):
         p = Path(filelink)
+        outputpath=""
         try:
             conn = self.getServerConnection()
             conn.connect(self.config['server_ip'],445)
@@ -78,10 +79,12 @@ class FileServer(object):
                         file_obj=file_obj)
             
             conn.close()
+            outputpath=path
 
         except Exception as e:
             logging.error(str(e))
-    
+        return outputpath
+
     def checkNCreate(self,conn,sourcedir):
         temp=str(sourcedir).split("/")
         subdir=temp[-1]

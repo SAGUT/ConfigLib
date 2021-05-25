@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from sqlalchemy import Column, Integer, String, ForeignKey,Text
+from sqlalchemy import Column, Integer, String, ForeignKey,Text,Float
 from sqlalchemy.orm import relationship
 from ...Database import Base
 
@@ -13,9 +13,10 @@ class BKVRegister(Base):
     bkvregister_register = Column(Integer)
     bkvregister_input = Column(String(255))
     bkvregister_name = Column(String(255))
+    bkvregister_physical_quantity= Column(String(255))
     bkvregister_unit = Column(String(255))
-    bkvregister_okrangehigh = Column(Integer)
-    bkvregister_okrangelow = Column(Integer)
+    bkvregister_okrangehigh = Column(Float)
+    bkvregister_okrangelow = Column(Float)
     bkvregister_history = Column(Text)
     template = relationship("BKVTemplate", back_populates="registers")
     

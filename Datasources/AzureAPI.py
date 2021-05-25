@@ -163,3 +163,24 @@ class AzureAPI(object):
                 else:
                     page=1
         return flsobjects
+
+    def getNonScalarConfig(self,signalid):
+        #start=time.time()
+        flsobjects=[]
+       
+        try:
+                
+            url=self.baseurl+self.defaultversion+"nonScalarCalculatedSignalConfig/{0}".format(signalid)
+            #print(url)
+            access_token=self.getToken()
+            headers = {'Authorization': 'Bearer ' + access_token}
+            jsonresult = requests.get(url, headers=headers).json()
+            #print(jsonresult)
+            flsobjects=jsonresult
+                
+                
+                
+        except Exception as e:
+            print("getNonScalarConfig error",str(e))
+                
+        return flsobjects

@@ -9,11 +9,18 @@ from ..Objects.Project import Project
 from ..Objects.System import System
 from ..Objects.BKV.DDAU3 import DDAU3
 from ..Objects.SPM.SPMSystems import SPMLarge
-from ..Objects.Channel import Channel
+from ..Objects.Channel import Channel,DDAU3Channel
 from ..Objects.Signals import CalculatedSignal
 from ..Objects.Sensor import Sensor,AccelerationSensor
 from ..Objects.Mapping import Mapping
 from ..Objects.SourceSignal import SourceSignal
+from ..Objects.NonScalarConfig import NonScalarConfig
+from ..Objects.SPM.SPMCondmasterServer import SPMCondmasterServer,SPMCondmasterDB,SPMCondmasterMP,SPMCondmasterFFTAS
+from ..Objects.BKV.BKVTemplate import BKVTemplate
+from ..Objects.BKV.BKVChannel import BKVChannel
+from ..Objects.BKV.BKVPush import BKVPush
+from ..Objects.BKV.BKVRegister import BKVRegister
+
 class CMSDB(object):
 
     def __init__(self):
@@ -105,5 +112,9 @@ class CMSDB(object):
             print("make it new")
             db_session.add(calcsignal)
         db_session.commit()
+    
     #BKV handling
-
+    def addTemplate(self,template):
+        db_session.add(template)
+        db_session.commit()
+        return template

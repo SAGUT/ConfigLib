@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from sqlalchemy import Column, Integer, String, ForeignKey,Text
+from sqlalchemy import Column, Integer, String, ForeignKey,Text,Float,Boolean
 from sqlalchemy.orm import relationship
 #from Application.database import Base, db_session, engine
 from ..Database import Base
@@ -26,5 +26,32 @@ class Channel(Base):
 
     # Lets us print out a user object conveniently.
     def __repr__(self):
-       return "<Project(system_name='%s', system_type='%s', system_description'%s')>" % (
-                               self.system_name, self.system_type, self.system_description)
+       return "<Channel(channel_name='%s', channel_number='%s', channel_type'%s')>" % (
+                               self.channel_name, self.channel_number, self.channel_type)
+
+
+class DDAU3Channel(Channel):
+    __tablename__ = 'tab_ddau3_channel'
+
+    # Every SQLAlchemy table should have a primary key named 'id'
+    #ddauchannel_id = Column(Integer, primary_key=True)
+    ddauchannel_channel_id = Column(Integer,ForeignKey('tab_channel.channel_id'), primary_key=True)
+    ddauchannel_bkvid = Column(String(255))  
+    ddauchannel_ch_idx= Column(Integer)
+    ddauchannel_bkvname = Column(String(255))
+    ddauchannel_limit_negative = Column(Float)
+    ddauchannel_offset = Column(Float)
+    ddauchannel_transducertype = Column(String(255))
+    ddauchannel_CCS= Column(Boolean)
+    ddauchannel_sensitivity = Column(Float)
+    ddauchannel_enable= Column(Boolean)
+    ddauchannel_limit_positive = Column(Float)
+
+    __mapper_args__ = {
+        'polymorphic_identity':'ddau3channel',
+    }
+    
+
+    # Lets us print out a user object conveniently.
+    def __repr__(self):
+       return "<DDAU3Channel(ddauchannel_channel_id='%s', ddauchannel_bkvname='%s')>" % ( self.ddauchannel_channel_id, self.ddauchannel_bkvname)

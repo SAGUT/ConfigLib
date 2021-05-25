@@ -28,7 +28,7 @@ class CalculatedSignal(Base):
     signal_designation= Column(String(255))
     signal_dataGroup= Column(String(255))
     signal_metadata= Column(Text)
-    
+    assignements = relationship("NonScalarConfig", back_populates="signal")
 
     # Lets us print out a user object conveniently.
     def __repr__(self):
