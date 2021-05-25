@@ -20,6 +20,7 @@ from ..Objects.BKV.BKVTemplate import BKVTemplate
 from ..Objects.BKV.BKVChannel import BKVChannel
 from ..Objects.BKV.BKVPush import BKVPush
 from ..Objects.BKV.BKVRegister import BKVRegister
+from ..Objects.IoT.FieldAgent import FieldAgent,FieldAgentModule,FieldAgentModuleVersion
 
 class CMSDB(object):
 

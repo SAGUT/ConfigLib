@@ -12,6 +12,16 @@ class DDAU3(System):
     ddau_id = Column(Integer, primary_key=True)
     ddau_system_id = Column(Integer,ForeignKey('tab_system.system_id'))
     ddau_ip = Column(String(255))
+    ddau_template = Column(Integer,ForeignKey('tab_bkv_template.bkvtemplate_id'),nullable=True)
+    ddau_port = Column(Integer)
+    ddau_ip = Column(String(255))
+    ddau_hardware_revision = Column(String(255))
+    ddau_device_id = Column(String(255))
+    ddau_prod_date = Column(String(255))
+    ddau_factory_version = Column(String(255))
+    ddau_ser_no = Column(String(255)) 
+    ddau_MAC = Column(String(255))
+    ddau_version = Column(String(255))
     
     __mapper_args__ = {
         'polymorphic_identity':'ddau3',
