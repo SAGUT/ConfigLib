@@ -11,7 +11,7 @@ class CalculatedSignal(Base):
     signal_id = Column(Integer, primary_key=True)
     signal_system_id = Column(Integer, ForeignKey('tab_system.system_id'))
     signal_sourcename = Column(String(255))
-    signal_source_id = Column(Integer, ForeignKey('tab_source_signal.sourcesignal_id'))
+    signal_source_id = Column(Integer)
     signal_name = Column(String(255))
     signal_signalType = Column(String(255))
     signal_channel_id = Column(Integer, ForeignKey('tab_channel.channel_id'),nullable=True)

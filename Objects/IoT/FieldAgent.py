@@ -21,7 +21,7 @@ class FieldAgent(Base):
     fa_web= Column(String(255))
     fa_base= Column(String(255))
 
-    modules = relationship("FieldAgentModule", back_populates="fa")
+    modules = relationship("FieldAgentModule", back_populates="fieldagent")
     # Lets us print out a user object conveniently.
     def __repr__(self):
        return "<FieldAgent(fa_project_id='%s', fa_name='%s', fa_model'%s')>" % (
@@ -38,7 +38,7 @@ class FieldAgentModule(Base):
     fa_module_type = Column(String(255))
     fa_module_name = Column(String(255))
     fieldagent = relationship("FieldAgent", back_populates="modules")
-    versions = relationship("FieldAgentModuleVersion", back_populates="module")
+    versions = relationship("FieldAgentModuleVersion", back_populates="fa_module")
     # Lets us print out a user object conveniently.
     def __repr__(self):
        return "<FieldAgentModule(fa_module_fa_id='%s', fa_module_name='%s')>" % ( self.fa_module_fa_id, self.fa_module_name)

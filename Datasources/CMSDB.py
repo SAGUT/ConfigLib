@@ -1,5 +1,5 @@
 import logging
-from sqlalchemy import Column, Integer, String, ForeignKey, create_engine
+from sqlalchemy import Column, Integer, String, ForeignKey, create_engine,update
 from sqlalchemy.sql import text
 from sqlalchemy.orm import scoped_session,sessionmaker
 from sqlalchemy.sql.expression import table
@@ -21,7 +21,7 @@ from ..Objects.BKV.BKVChannel import BKVChannel
 from ..Objects.BKV.BKVPush import BKVPush
 from ..Objects.BKV.BKVRegister import BKVRegister
 from ..Objects.IoT.FieldAgent import FieldAgent,FieldAgentModule,FieldAgentModuleVersion
-
+from ..Objects.IoT.Hierarchy import Hierarchy
 class CMSDB(object):
 
     def __init__(self):
@@ -119,3 +119,12 @@ class CMSDB(object):
         db_session.add(template)
         db_session.commit()
         return template
+    
+    def addHierarchy(self,hierarchy):
+        db_session.add(hierarchy)
+        db_session.commit()
+        return hierarchy
+
+    def updateHierarchy(self,hierarchy):
+        db_session.execute(update(Hierarchy).where(Hierarchy.hierarchy_id ==hierarchy.hierarchy_id).values(hierarchy_dbparent=hierarchy.hierarchy_dbparent))
+        db_session.commit()
