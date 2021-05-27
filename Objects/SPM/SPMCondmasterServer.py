@@ -1,5 +1,6 @@
 from __future__ import absolute_import
-from sqlalchemy import Column, Integer, String, ForeignKey,Text
+from sqlalchemy import Column, Integer, String, ForeignKey,Text,JSON
+from sqlalchemy.sql.sqltypes import Boolean, Float
 
 #from Application.ConfigLib.LibFrame import applicationDict      # .database import Base
 from ...Database import Base
@@ -42,10 +43,7 @@ class SPMCondmasterMP(Base):
     spmcondmastermp_number = Column(String(255))
     spmcondmastermp_intno = Column(Integer)
     spmcondmastermp_name = Column(String(255))
-    spmcondmastermp_componentname = Column(String(255))
-    spmcondmastermp_componentnumber = Column(String(255))
-    spmcondmastermp_componentintno = Column(Integer)
-    spmcondmastermp_machineintno = Column(Integer)
+    spmcondmastermp_assignment = Column(Text(convert_unicode=True))
     
     # Lets us print out a user object conveniently.
     def __repr__(self):
@@ -57,14 +55,9 @@ class SPMCondmasterFFTAS(Base):
     # Every SQLAlchemy table should have a primary key named 'id'
     spmcondmasterfftas_id = Column(Integer, primary_key=True)
     spmcondmasterfftas_mpid = Column(Integer,ForeignKey('tab_spm_condmaster_mp.spmcondmastermp_id'))
-    spmcondmasterfftas_TechID = Column(String(255))
-    spmcondmastefftas_intno = Column(Integer)
-    spmcondmasterfftas_name = Column(String(255))
-    spmcondmasterfftas_TechName = Column(String(255))
-    spmcondmasterfftas_componentnumber = Column(String(255))
-    spmcondmasterfftas_componentintno = Column(Integer)
-    spmcondmasterfftas_machineintno = Column(Integer)
+    spmcondmasterfftas_assignments=Column(JSON)
+    
     
     # Lets us print out a user object conveniently.
     def __repr__(self):
-       return "<SPMCondmasterFFTAS(spmcondmasterfftas_TechID='%s', spmcondmasterfftas_TechName='%s')>" % (self.spmcondmasterfftas_TechID, self.spmcondmasterfftas_TechName)
+       return "<SPMCondmasterFFTAS(spmcondmasterfftas_id='%s', spmcondmasterfftas_mpid='%s')>" % (self.spmcondmasterfftas_id, self.spmcondmasterfftas_mpid)

@@ -1,3 +1,4 @@
+import json
 import logging
 from sqlalchemy import Column, Integer, String, ForeignKey, create_engine,update
 from sqlalchemy.sql import text
@@ -16,7 +17,7 @@ from ..Objects.Sensor import Sensor,AccelerationSensor
 from ..Objects.Mapping import Mapping
 from ..Objects.SourceSignal import SourceSignal
 from ..Objects.NonScalarConfig import NonScalarConfig
-from ..Objects.SPM.SPMCondmasterServer import SPMCondmasterServer,SPMCondmasterDB,SPMCondmasterMP,SPMCondmasterFFTAS
+from ..Objects.SPM.SPMCondmasterServer import SPMCondmasterServer,SPMCondmasterDB,SPMCondmasterMP
 from ..Objects.BKV.BKVTemplate import BKVTemplate
 from ..Objects.BKV.BKVChannel import BKVChannel
 from ..Objects.BKV.BKVPush import BKVPush
@@ -129,3 +130,43 @@ class CMSDB(object):
     def updateHierarchy(self,hierarchy):
         db_session.execute(update(Hierarchy).where(Hierarchy.hierarchy_id ==hierarchy.hierarchy_id).values(hierarchy_dbparent=hierarchy.hierarchy_dbparent))
         db_session.commit()
+
+    #SPM handling
+    def getSPMServerByID(self,ID):
+        logging.debug("query getSPMServerByID: "+ID)
+        querystr="spmcondmaster_id={0}".format(ID)
+        server=db_session.query(SPMCondmasterServer).filter(text(querystr)).one()
+        
+        return server
+
+    
+    def upsertSPMMP(self,spmmp):
+        #exists = db_session.query(exists().where(SourceSignal.sourcesignal_azureid == sourcesignal.sourcesignal_azureid)).scalar()
+        querystr="spmcondmastermp_server={0} and spmcondmastermp_intno={1}".format(spmmp.spmcondmastermp_server,spmmp.spmcondmastermp_intno)
+        mp =  db_session.query(SPMCondmasterMP).filter(text(querystr)).first()
+        print(mp)
+        
+        if not mp is None:
+            print("found it",mp.spmcondmastermp_id,mp.spmcondmastermp_name)
+            mp.spmcondmastermp_name=spmmp.spmcondmastermp_name
+            mp.spmcondmastermp_number=spmmp.spmcondmastermp_number
+            db_session.flush()
+            key=mp.spmcondmastermp_id
+        else:
+            print("make it new")
+            db_session.add(spmmp)
+            db_session.flush()
+            key=spmmp.spmcondmastermp_id
+        db_session.commit()
+        return key
+
+    def getUpdateAssignment(self,mp):
+        logging.debug("query getUpdateAssignment ")
+        print("id: ",mp.spmcondmastermp_id)
+        dbmp=db_session.query(SPMCondmasterMP).filter(SPMCondmasterMP.spmcondmastermp_id==mp.spmcondmastermp_id).first()
+        print(dbmp)
+        dbmp.spmcondmastermp_assignment=mp.spmcondmastermp_assignment
+        db_session.flush()
+        db_session.commit()
+        return dbmp
+        
