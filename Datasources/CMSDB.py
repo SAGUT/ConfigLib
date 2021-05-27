@@ -8,6 +8,7 @@ from ..Database import Base,engine,db_session
 from ..Objects.Project import Project
 from ..Objects.System import System
 from ..Objects.BKV.DDAU3 import DDAU3
+from ..Objects.IoT.OPCServer import OPC
 from ..Objects.SPM.SPMSystems import SPMLarge
 from ..Objects.Channel import Channel,DDAU3Channel
 from ..Objects.Signals import CalculatedSignal
