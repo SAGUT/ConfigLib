@@ -184,3 +184,46 @@ class AzureAPI(object):
             print("getNonScalarConfig error",str(e))
                 
         return flsobjects
+
+    def searchSite(self,searchstr):
+        #start=time.time()
+        flsobjects=dict()
+        levelstring=""
+        page=1
+        hasMore=True
+        counter=1
+        while(hasMore):
+            try:
+                
+                url=self.baseurl+self.defaultversion+"sites?page={0}&pageSize={1}&siteName={2}".format(page,100,searchstr)
+                #print(url)
+                access_token=self.getToken()
+                headers = {'Authorization': 'Bearer ' + access_token}
+                jsonresult = requests.get(url, headers=headers).json()
+                #print(jsonresult)
+                if 'totalCount' in jsonresult:
+                    
+                    totalcount=jsonresult['totalCount']
+                    if counter<=totalcount:
+                        print("reached max count:",counter,totalcount)
+                        hasMore=True
+                    
+                        for objecte in jsonresult['values']:
+                            
+                            flsobjects[objecte["name"]]=objecte
+                            
+                            counter+=1
+                    else:
+                        hasMore=False
+                
+                page=page+1
+                
+                
+                
+            except Exception as e:
+                print("searchSite error",str(e))
+                if page>1:
+                    page=page-1
+                else:
+                    page=1
+        return flsobjects
