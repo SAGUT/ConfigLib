@@ -2,6 +2,7 @@ import logging
 import json
 import os
 from pathlib import Path
+from datetime import date, datetime
 from ..LibFrame import applicationDict
 from smb.SMBConnection import SMBConnection
 import socket
@@ -38,7 +39,7 @@ class FileServer(object):
             conn.close()
         except Exception as e:
             logging.error(str(e))
-
+    #store project data
     def createNewProject(self,projectid):
         try:
             conn = self.getServerConnection()
@@ -53,6 +54,17 @@ class FileServer(object):
             conn.close()
         except Exception as e:
             logging.error(str(e))
+
+    def storeScalarData(self,projectid,datestr,sourcefilelink):
+        try:
+            conn = self.getServerConnection()
+            conn.connect(self.config['server_ip'],445)
+            scalardir="CMSData/Projects/{0}/data/scalar/{1}".format(projectid,datestr)
+            self.checkNCreate(conn,scalardir)
+
+        except Exception as e:
+            logging.error(str(e))
+
 
     def storeBKVTemplate(self,application,filelink):
         p = Path(filelink)
