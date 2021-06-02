@@ -16,6 +16,7 @@ class NonScalarConfig(Base):
     scalarconfig_condmasterId = Column(String(255))
     scalarconfig_condmasterDb = Column(Integer, ForeignKey('tab_spm_condmaster_db.spmcondmasterdb_id'))
     scalarconfig_condmasterServer = Column(Integer, ForeignKey('tab_spm_condmaster.spmcondmaster_id'))
+    scalarconfig_condmasterAssignment = Column(Integer, ForeignKey('tab_spm_condmaster_fftas.spmcondmasterfftas_id'))
     scalarconfig_enableScale = Column(Boolean)
     scalarconfig_scaleFactor = Column(Float)
     scalarconfig_type = Column(String(255))

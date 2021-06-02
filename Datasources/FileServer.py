@@ -5,6 +5,7 @@ from pathlib import Path
 from datetime import date, datetime
 from ..LibFrame import applicationDict
 from smb.SMBConnection import SMBConnection
+from ..Objects.ScalarFile import ScalarFile
 import socket
 
 
@@ -39,8 +40,9 @@ class FileServer(object):
             conn.close()
         except Exception as e:
             logging.error(str(e))
+    
     #store project data
-    def createNewProject(self,projectid):
+    def checkProject(self,projectid):
         try:
             conn = self.getServerConnection()
             conn.connect(self.config['server_ip'],445)
@@ -54,17 +56,56 @@ class FileServer(object):
             conn.close()
         except Exception as e:
             logging.error(str(e))
-
+    '''
     def storeScalarData(self,projectid,datestr,sourcefilelink):
+        p = Path(sourcefilelink)
         try:
             conn = self.getServerConnection()
             conn.connect(self.config['server_ip'],445)
             scalardir="CMSData/Projects/{0}/data/scalar/{1}".format(projectid,datestr)
             self.checkNCreate(conn,scalardir)
-
+            path=scalardir+"/"+p.name
+            with open(p, 'rb') as file_obj:
+                conn.storeFile(service_name=self.config['sharename'],  # It's the name of shared folder
+                        path=path,
+                        file_obj=file_obj)
+            
+            conn.close()
         except Exception as e:
             logging.error(str(e))
-
+    '''
+    def storeScalarData(self,projectid,resultfiles):
+        
+        #p = Path(sourcefilelink)
+        try:
+            conn = self.getServerConnection()
+            conn.connect(self.config['server_ip'],445)
+            for datestr,filelist in resultfiles.items():
+                scalardir="CMSData/Projects/{0}/data/scalar/{1}".format(projectid,datestr)
+                self.checkNCreate(conn,scalardir)
+                for sourcefile in filelist:
+                    p = Path(sourcefile['filelink'])
+                    path=scalardir+"/"+p.name
+                    with open(p, 'rb') as file_obj:
+                        conn.storeFile(service_name=self.config['sharename'],  # It's the name of shared folder
+                                path=path,
+                                file_obj=file_obj)
+                    result=ScalarFile(scalarfile_name = p.name,
+                                        scalarfile_type = sourcefile['scalarfile_type'],
+                                        scalarfile_project_id=sourcefile['scalarfile_project_id'],
+                                        scalarfile_system_id=sourcefile['scalarfile_system_id'],
+                                        scalarfile_signal_id=sourcefile['scalarfile_signal_id'],
+                                        scalarfile_link = str(path),
+                                        scalarfile_no_meas = sourcefile['scalarfile_no_meas'],
+                                        scalarfile_size = sourcefile['scalarfile_size'],
+                                        scalarfile_year = sourcefile['scalarfile_year'],
+                                        scalarfile_month = sourcefile['scalarfile_month'],
+                                        scalarfile_day=sourcefile['scalarfile_day'] )
+                    applicationDict["dbconn"].addScalarFile(result)
+                    os.remove(p)
+            conn.close()
+        except Exception as e:
+            logging.error(str(e))
 
     def storeBKVTemplate(self,application,filelink):
         p = Path(filelink)

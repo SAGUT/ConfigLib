@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from sqlalchemy import Column, Integer, String, ForeignKey,Text,JSON
+from sqlalchemy import Column, Integer, String, ForeignKey,Text
 from sqlalchemy.sql.sqltypes import Boolean, Float
 
 #from Application.ConfigLib.LibFrame import applicationDict      # .database import Base
@@ -55,7 +55,9 @@ class SPMCondmasterFFTAS(Base):
     # Every SQLAlchemy table should have a primary key named 'id'
     spmcondmasterfftas_id = Column(Integer, primary_key=True)
     spmcondmasterfftas_mpid = Column(Integer,ForeignKey('tab_spm_condmaster_mp.spmcondmastermp_id'))
-    spmcondmasterfftas_assignments=Column(JSON)
+    spmcondmasterfftas_dbid = Column(Integer,ForeignKey('tab_spm_condmaster_db.spmcondmasterdb_id'))
+    spmcondmasterfftas_techid = Column(String(255))
+    spmcondmasterfftas_assignments=Column(Text(convert_unicode=True))
     
     
     # Lets us print out a user object conveniently.

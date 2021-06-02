@@ -14,7 +14,6 @@ class DDAU3(System):
     ddau_ip = Column(String(255))
     ddau_template = Column(Integer,ForeignKey('tab_bkv_template.bkvtemplate_id'),nullable=True)
     ddau_port = Column(Integer)
-    ddau_ip = Column(String(255))
     ddau_hardware_revision = Column(String(255))
     ddau_device_id = Column(String(255))
     ddau_prod_date = Column(String(255))
@@ -30,4 +29,4 @@ class DDAU3(System):
 
     # Lets us print out a user object conveniently.
     def __repr__(self):
-       return "<DDAU3(ddau_id='%s', ddau_name='%s')>" % ( self.ddau_id, self.ddau_ip)
+       return "<DDAU3(ddau_id='%s', ddau_name='%s')>" % ( self.ddau_id, self.system_name)

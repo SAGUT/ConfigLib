@@ -28,6 +28,8 @@ class CalculatedSignal(Base):
     signal_designation= Column(String(255))
     signal_dataGroup= Column(String(255))
     signal_metadata= Column(Text)
+    signal_environment= Column(String(255))
+    signal_speedsignal= Column(Integer, ForeignKey('tab_calculated_signal.signal_id'),nullable=True)
     assignements = relationship("NonScalarConfig", back_populates="signal")
 
     # Lets us print out a user object conveniently.

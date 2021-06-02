@@ -5,7 +5,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 import time
 import urllib.parse
-from ..Objects.SPM.SPMCondmasterServer import SPMCondmasterMP,SPMCondmasterFFTAS
+from ..Objects.SPM.SPMCondmasterServer import SPMCondmasterMP
 class SPMAPI(object):
     '''
     classdocs

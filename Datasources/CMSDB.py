@@ -17,13 +17,14 @@ from ..Objects.Sensor import Sensor,AccelerationSensor
 from ..Objects.Mapping import Mapping
 from ..Objects.SourceSignal import SourceSignal
 from ..Objects.NonScalarConfig import NonScalarConfig
-from ..Objects.SPM.SPMCondmasterServer import SPMCondmasterServer,SPMCondmasterDB,SPMCondmasterMP
+from ..Objects.SPM.SPMCondmasterServer import SPMCondmasterServer,SPMCondmasterDB,SPMCondmasterMP,SPMCondmasterFFTAS
 from ..Objects.BKV.BKVTemplate import BKVTemplate
 from ..Objects.BKV.BKVChannel import BKVChannel
 from ..Objects.BKV.BKVPush import BKVPush
 from ..Objects.BKV.BKVRegister import BKVRegister
 from ..Objects.IoT.FieldAgent import FieldAgent,FieldAgentModule,FieldAgentModuleVersion
 from ..Objects.IoT.Hierarchy import Hierarchy
+from ..Objects.ScalarFile import ScalarFile
 class CMSDB(object):
 
     def __init__(self):
@@ -66,15 +67,46 @@ class CMSDB(object):
     
     def getProject(self,projectid):
         return Project.query.get(projectid)
+    
+    def getProjectByName(self,name):
+        project=None
+        logging.debug("query Project: "+name)
+        exists = db_session.query(
+                db_session.query(Project).filter_by(project_name= name).exists()
+                ).scalar()
+        if exists:
+            print("found it")
+
+            querystr="project_name='{0}'".format(name)
+            project=db_session.query(Project).filter(text(querystr)).one()
+        
+        return project
 
     def getSystem(self,systemid):
         return System.query.get(systemid)
+    
+    def getSystemsByProjectID(self,projectid):
+        systems=db_session.query(System).filter(System.system_project_id==projectid)
+        return systems
 
     #CMS handling
+    def checkCMS(self,cmssystem):
+        #querystr="system_project_id={0} and system_name='{1}'".format(cmssystem.system_project_id,cmssystem.system_name)
+        exists = db_session.query(db_session.query(System).filter_by(system_project_id= cmssystem.system_project_id,system_name= cmssystem.system_name).exists()).scalar()
+        print(exists,cmssystem.system_name,cmssystem.system_project_id)
+        return exists
+
     def addCMSSystem(self,cmssystem):
         db_session.add(cmssystem)
         db_session.commit()
         return cmssystem
+
+    def addDDAU3(self,ddau3):
+        db_session.add(ddau3)
+        db_session.commit()
+        return ddau3
+
+    
     #sourcesignal handling
     def upsertSourceSignal(self,sourcesignal):
         #exists = db_session.query(exists().where(SourceSignal.sourcesignal_azureid == sourcesignal.sourcesignal_azureid)).scalar()
@@ -94,16 +126,21 @@ class CMSDB(object):
     
     def getSourceSignalByAzureID(self,azureid):
         logging.debug("query Sourcesignal: "+azureid)
-        querystr="sourcesignal_azureid='{0}'".format(azureid)
-        signal=db_session.query(SourceSignal).filter(text(querystr)).one()
-        
+        exists = db_session.query(
+                db_session.query(SourceSignal).filter_by(sourcesignal_azureid= azureid).exists()
+                ).scalar()
+        if exists:
+            querystr="sourcesignal_azureid='{0}'".format(azureid)
+            signal=db_session.query(SourceSignal).filter(text(querystr)).one()
+        else:
+            signal=None
         return signal
     
     def deleteSourceSignal(self,signalid):
         db_session.query(SourceSignal).filter(SourceSignal.sourcesignal_id==signalid).delete()
         db_session.commit()
     
-    #sourcesignal handling
+    #calculatedsignal handling
     def upsertCalculatedSignal(self,calcsignal):
         #exists = db_session.query(exists().where(SourceSignal.sourcesignal_azureid == sourcesignal.sourcesignal_azureid)).scalar()
         exists = db_session.query(
@@ -116,6 +153,14 @@ class CMSDB(object):
             db_session.add(calcsignal)
         db_session.commit()
     
+    def getCalculatedSignals(self,systemid):
+        ssignals=db_session.query(CalculatedSignal).filter(CalculatedSignal.signal_system_id==systemid)
+        return ssignals 
+    
+    def updateCalculatedSignalChannel(self,signalid,channelid):
+        db_session.execute(update(CalculatedSignal).where(CalculatedSignal.signal_id ==signalid).values(signal_channel_id=channelid))
+        db_session.commit()
+
     #BKV handling
     def addTemplate(self,template):
         db_session.add(template)
@@ -131,6 +176,32 @@ class CMSDB(object):
         db_session.execute(update(Hierarchy).where(Hierarchy.hierarchy_id ==hierarchy.hierarchy_id).values(hierarchy_dbparent=hierarchy.hierarchy_dbparent))
         db_session.commit()
 
+    def getDDAU3TemplateChannels(self,templateid):
+        result=dict()
+        channels=db_session.query(BKVChannel).filter(BKVChannel.bkvchannel_templateid==templateid)
+        for channel in channels:
+            result[channel.bkvchannel_idstr]=channel
+        return result
+
+    def getDDAU3ChannelsByBKVID(self,systemid):
+        result=dict()
+        channels=db_session.query(DDAU3Channel).filter(DDAU3Channel.channel_system_id==systemid)
+        for channel in channels:
+            result[channel.ddauchannel_bkvid]=channel
+        return result
+    
+    def getDDAU3ChannelsByName(self,systemid):
+        result=dict()
+        channels=db_session.query(DDAU3Channel).filter(DDAU3Channel.channel_system_id==systemid)
+        for channel in channels:
+            result[channel.channel_name]=channel
+        return result
+    
+    def addDDAU3Channel(self,ddau3channel):
+        db_session.add(ddau3channel)
+        db_session.commit()
+        return ddau3channel
+    
     #SPM handling
     def getSPMServerByID(self,ID):
         logging.debug("query getSPMServerByID: "+ID)
@@ -138,8 +209,66 @@ class CMSDB(object):
         server=db_session.query(SPMCondmasterServer).filter(text(querystr)).one()
         
         return server
-
     
+    def addSPMAssignment(self,assignment):
+        db_session.add(assignment)
+        db_session.commit()
+        return assignment
+    '''
+    def upsertSPMAssignment(self,assignment):
+        querystr="spmcondmasterfftas_dbid={0} and spmcondmasterfftas_techid={1}".format(assignment.spmcondmasterfftas_dbid,assignment.spmspmcondmasterfftas_techidmastermp_intno)
+        mp =  db_session.query(SPMCondmasterFFTAS).filter(text(querystr)).first()
+        print(mp)
+        
+        if not mp is None:
+            db_session.execute(update(ScalarFile).where(ScalarFile.scalarfile_id ==dbsig.scalarfile_id).values(
+                scalarfile_size=scalarfile.scalarfile_size,
+                scalarfile_link=scalarfile.scalarfile_link
+                ))
+        else:
+            print("make it new")
+            db_session.add(assignment)
+            db_session.flush()
+            
+        db_session.commit()
+    '''
+
+    def getSPMServers(self):
+        logging.debug("query getSPMServer")
+        result=dict()
+        #projects=db_session.query(Project).filter().order_by(text('project_country, project_site'))
+        servers=db_session.query(SPMCondmasterServer).filter().all()
+        for server in servers:
+            result[server.spmcondmaster_name]=server
+                
+        return result
+
+    def getSPMDatabaseByName(self,serverid,databasename):
+        querystr="spmcondmasterdb_server={0} and spmcondmasterdb_name='{1}'".format(serverid,databasename)
+        db=db_session.query(SPMCondmasterDB).filter(text(querystr)).first()
+        return db
+
+
+    def getSPMDatabases(self):
+        logging.debug("query getSPMDatabases")
+        result=dict()
+        #projects=db_session.query(Project).filter().order_by(text('project_country, project_site'))
+        dbs=db_session.query(SPMCondmasterDB).filter().all()
+        for db in dbs:
+            if not db.spmcondmasterdb_server in result:
+                result[db.spmcondmasterdb_server]=dict()
+            result[db.spmcondmasterdb_server][db.spmcondmasterdb_name]=db
+                
+        return result
+    
+    def getSPMFFTASSByechID(self,dbid,techid):
+        logging.debug("query getSPMFFTASS")
+        querystr="spmcondmasterfftas_dbid={0} and spmcondmasterfftas_techid='{1}'".format(dbid,techid)
+        ass=db_session.query(SPMCondmasterFFTAS).filter(text(querystr)).first()
+        return ass
+                
+        return result
+
     def upsertSPMMP(self,spmmp):
         #exists = db_session.query(exists().where(SourceSignal.sourcesignal_azureid == sourcesignal.sourcesignal_azureid)).scalar()
         querystr="spmcondmastermp_server={0} and spmcondmastermp_intno={1}".format(spmmp.spmcondmastermp_server,spmmp.spmcondmastermp_intno)
@@ -169,4 +298,30 @@ class CMSDB(object):
         db_session.flush()
         db_session.commit()
         return dbmp
+
+    #fileserver data
+    def addScalarFile(self,scalarfile):
+        '''
+        exists = db_session.query(
+                db_session.query(ScalarFile).filter_by(scalarfile_signal_id= scalarfile.scalarfile_signal_id,
+                scalarfile_year= scalarfile.scalarfile_year,
+                scalarfile_month= scalarfile.scalarfile_month,
+                scalarfile_day= scalarfile.scalarfile_day).exists()
+                ).scalar()
+        '''
+        dbsig=db_session.query(ScalarFile).filter_by(scalarfile_signal_id= scalarfile.scalarfile_signal_id,
+                scalarfile_year= scalarfile.scalarfile_year,
+                scalarfile_month= scalarfile.scalarfile_month,
+                scalarfile_day= scalarfile.scalarfile_day).first()
+        if not dbsig is None:
+            print("found it")
+            db_session.execute(update(ScalarFile).where(ScalarFile.scalarfile_id ==dbsig.scalarfile_id).values(
+                scalarfile_size=scalarfile.scalarfile_size,
+                scalarfile_link=scalarfile.scalarfile_link
+                ))
+        else:
+            print("make it new")
+            db_session.add(scalarfile)
+        db_session.commit()
+        return scalarfile
         

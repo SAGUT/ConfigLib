@@ -5,6 +5,8 @@ import requests
 import time
 import urllib.parse
 from ..Objects.SourceSignal import SourceSignal
+import numpy as np
+import pandas as pd
 class AzureAPI(object):
     '''
     classdocs
@@ -227,3 +229,43 @@ class AzureAPI(object):
                 else:
                     page=1
         return flsobjects
+    
+    def getTimeseriesV2(self,signalid,starttime,endtime,includeBadQuality=False):
+        access_token=self.getToken()
+       
+        incBadQ="false"
+        if includeBadQuality:
+            incBadQ="true"
+        values=[]
+        index=[]
+        quality=[]
+        try:
+            headers = {'Authorization': 'Bearer ' + access_token}
+            finalurl=self.baseurl+"v2/signals/{0}/timeseries?end={1}&includeBadQuality={2}&start={3}".format(signalid,endtime,incBadQ,starttime)
+            response = requests.get(finalurl, headers=headers)
+            jsonresult=response.json()
+            counter=0
+            if 'values' in jsonresult:
+                print("no of values",len(jsonresult['values']))
+                if len(jsonresult['values'])>0:
+                    for object in jsonresult['values']:
+                        #flsobjects[object["id"]]=object
+                        lasttime=object['timestamp']
+                        
+                        if int(object['quality'])>0:
+                            values.append(float(object['value']))
+                            index.append(lasttime)
+                            quality=object['quality']
+                        else:
+                            values.append(np.nan)
+                            index.append(lasttime)
+                            quality=object['quality']
+            counter=len(values)
+            qualityid=signalid+"_quality"
+            dataframe=pd.DataFrame({'timestamps':index, signalid:values,qualityid:quality})
+            dataframe['datetime']=pd.DatetimeIndex(pd.to_datetime(dataframe['timestamps'], unit='ms')).tz_localize('UTC' )
+            dataframe=dataframe.set_index('datetime')
+        except Exception as e:
+            print("get getTimeseriesV2 error",str(e))
+        
+        return dataframe,counter
