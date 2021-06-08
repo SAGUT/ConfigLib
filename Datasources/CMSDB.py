@@ -25,6 +25,10 @@ from ..Objects.BKV.BKVRegister import BKVRegister
 from ..Objects.IoT.FieldAgent import FieldAgent,FieldAgentModule,FieldAgentModuleVersion
 from ..Objects.IoT.Hierarchy import Hierarchy
 from ..Objects.ScalarFile import ScalarFile
+from ..Objects.Reporting.ProjectReport import Report
+from ..Objects.Reporting.ChannelReport import ChannelStatus
+from ..Objects.Reporting.ChannelPlots import ChannelPlots
+from ..Objects.NonScalarFile import NonScalarFile
 class CMSDB(object):
 
     def __init__(self):
@@ -53,6 +57,23 @@ class CMSDB(object):
 
 
     #----------------------------------------------------
+    def addObject(self,ormobject):
+        db_session.add(ormobject)
+        db_session.commit()
+        return ormobject
+
+    def getReport(self,report_id):
+        return Report.query.get(report_id)
+    
+    def getChannelsStatus(self,report_id):
+        channelsstatus=db_session.query(ChannelStatus).filter(ChannelStatus.channel_status_report_id==report_id)
+        return channelsstatus
+    
+    def getChannelPlots(self,report_id,channel_id):  
+        querystr="channel_plot_report_id={0} and channel_plot_channel_id={1}".format(report_id,channel_id)
+        ssignals=db_session.query(ChannelPlots).filter(text(querystr)).all()
+        
+        return ssignals 
     #project handling
     def addProject(self,project):
         db_session.add(project)
@@ -88,6 +109,13 @@ class CMSDB(object):
     def getSystemsByProjectID(self,projectid):
         systems=db_session.query(System).filter(System.system_project_id==projectid)
         return systems
+    
+    def getChannel(self,channelid):
+        return Channel.query.get(channelid)
+    
+    def getDDAUChannelsBySystemID(self,systemid):
+        channels=db_session.query(DDAU3Channel).filter(DDAU3Channel.channel_system_id==systemid)
+        return channels
 
     #CMS handling
     def checkCMS(self,cmssystem):
@@ -157,9 +185,25 @@ class CMSDB(object):
         ssignals=db_session.query(CalculatedSignal).filter(CalculatedSignal.signal_system_id==systemid)
         return ssignals 
     
+    def getCalculatedSignalsBType(self,systemid,type):
+        querystr="signal_system_id={0} and signal_signalType='{1}'".format(systemid,type)
+        ssignals=db_session.query(CalculatedSignal).filter(text(querystr)).all()
+        
+        return ssignals 
+    
+    def getCalculatedSignal(self,signal_id):
+        return CalculatedSignal.query.get(signal_id)
+        
+    
     def updateCalculatedSignalChannel(self,signalid,channelid):
         db_session.execute(update(CalculatedSignal).where(CalculatedSignal.signal_id ==signalid).values(signal_channel_id=channelid))
         db_session.commit()
+    
+    def getCalculatedSignalsByChannel(self,channel_id):  
+        querystr="signal_channel_id={0}".format(channel_id)
+        ssignals=db_session.query(CalculatedSignal).filter(text(querystr)).all()
+        
+        return ssignals 
 
     #BKV handling
     def addTemplate(self,template):
@@ -317,6 +361,7 @@ class CMSDB(object):
             print("found it")
             db_session.execute(update(ScalarFile).where(ScalarFile.scalarfile_id ==dbsig.scalarfile_id).values(
                 scalarfile_size=scalarfile.scalarfile_size,
+                scalarfile_no_meas=scalarfile.scalarfile_no_meas,
                 scalarfile_link=scalarfile.scalarfile_link
                 ))
         else:
@@ -324,4 +369,91 @@ class CMSDB(object):
             db_session.add(scalarfile)
         db_session.commit()
         return scalarfile
+    
+    def getNonScalarFileByDate(self,signal_id,year,month,day,hour):
+        querystr="nonscalarfile_signal_id={0} \
+        and nonscalarfile_year={1} \
+        and nonscalarfile_month={2} \
+        and nonscalarfile_day={3} \
+        and nonscalarfile_hour={4}".format(signal_id,year,month,day,hour)
+        return db_session.query(NonScalarFile).filter(text(querystr)).first()
         
+        
+    def upsertNonScalarFiles(self,nonscalfile):
+        
+
+        querystr="nonscalarfile_signal_id={0} and nonscalarfile_timestamp={1}".format(nonscalfile.nonscalarfile_signal_id,nonscalfile.nonscalarfile_timestamp)
+        logging.debug(querystr)
+        dbresult =  db_session.query(NonScalarFile).filter(text(querystr)).first()
+        
+        logging.debug(str(dbresult))
+        
+        if not dbresult is None:
+            print("found it",dbresult.nonscalarfile_signal_id)
+            
+            dbresult.nonscalarfile_speed = nonscalfile.nonscalarfile_speed
+            dbresult.nonscalarfile_RPM_Avg = nonscalfile.nonscalarfile_RPM_Avg
+            dbresult.nonscalarfile_RPM_Max = nonscalfile.nonscalarfile_RPM_Max
+            dbresult.nonscalarfile_RPM_Min =nonscalfile.nonscalarfile_RPM_Min
+            db_session.flush()
+            
+        else:
+            print("make it new")
+            db_session.add(nonscalfile)
+            db_session.flush()
+            
+        db_session.commit()
+
+    def upsertScalarFiles(self,scalfile):
+        
+
+        querystr="scalarfile_signal_id={0} \
+            and scalarfile_year={1} \
+            and scalarfile_month={2} \
+            and scalarfile_day={3}".format(scalfile.scalarfile_signal_id,scalfile.scalarfile_year,scalfile.scalarfile_month,scalfile.scalarfile_day)
+        logging.debug(querystr)
+        dbresult =  db_session.query(ScalarFile).filter(text(querystr)).first()
+        
+        logging.debug(str(dbresult))
+        
+        if not dbresult is None:
+            print("found it",dbresult.scalarfile_signal_id)
+            
+            dbresult.scalarfile_size = scalfile.scalarfile_size
+            dbresult.scalarfile_no_meas = scalfile.scalarfile_no_meas
+            
+            db_session.flush()
+            
+        else:
+            print("make it new")
+            db_session.add(scalfile)
+            db_session.flush()
+            
+        db_session.commit()
+        
+    def getScalarFile(self,signal_id,year,month,day):
+        querystr="scalarfile_signal_id={0} \
+                    and scalarfile_year={1} \
+                    and scalarfile_month={2}\
+                    and scalarfile_day={3}".format(signal_id,year,month,day)
+        logging.debug(querystr)
+        dbresult =  db_session.query(ScalarFile).filter(text(querystr)).first()
+        return dbresult
+    
+    def getScalarFilesByProject(self,project_id,year,month,day):
+        querystr="scalarfile_project_id={0} \
+                    and scalarfile_year={1} \
+                    and scalarfile_month={2}\
+                    and scalarfile_day={3}".format(project_id,year,month,day)
+        logging.debug(querystr)
+        dbresult =  db_session.query(ScalarFile).filter(text(querystr)).all()
+        return dbresult
+        
+    def getNameMapping(self,mapping_short):
+        try:
+            querystr="mapping_short='{0}'".format(mapping_short)
+            mapped=db_session.query(Mapping).filter(text(querystr)).one()
+        except:
+            logging.debug("not mapped: "+str(mapping_short))
+            mapped=mapping_short
+        return mapped 

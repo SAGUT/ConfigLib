@@ -34,4 +34,4 @@ class CalculatedSignal(Base):
 
     # Lets us print out a user object conveniently.
     def __repr__(self):
-       return "<CalculatedSignal(signal_name='%s', signal_type='%s', signal_description'%s')>" % (self.signal_name, self.signal_type, self.signal_description)
+       return "<CalculatedSignal(signal_name='%s', signal_signalType='%s', signal_description'%s')>" % (self.signal_name, self.signal_signalType, self.signal_description)

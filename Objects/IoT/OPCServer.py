@@ -22,4 +22,4 @@ class OPC(System):
 
     # Lets us print out a user object conveniently.
     def __repr__(self):
-       return "<DDAU3(ddau_id='%s', ddau_name='%s')>" % ( self.ddau_id, self.ddau_ip)
+       return "<OPC(opc_id='%s', opc_ip='%s')>" % ( self.opc_id, self.opc_ip)

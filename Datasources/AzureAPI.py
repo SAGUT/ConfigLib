@@ -165,6 +165,33 @@ class AzureAPI(object):
                 else:
                     page=1
         return flsobjects
+    
+    def getNonScalarEvents(self,azureid,starttime,page,pageSize=20):
+        #start=time.time()
+        flsobjects=[]
+        
+        try:
+                
+            url=self.baseurl+self.defaultversion+"events?page={0}&pageSize={1}&assetId={2}&orderBy=TIMESTAMP_ASC&since={3}".format(page,pageSize,azureid,starttime)
+            #print(url)
+            access_token=self.getToken()
+            headers = {'Authorization': 'Bearer ' + access_token}
+            jsonresult = requests.get(url, headers=headers).json()
+            #print(jsonresult)
+            if 'totalCount' in jsonresult:
+                totalPages=jsonresult['totalPages']
+                totalcount=jsonresult['totalCount']
+                for objecte in jsonresult['events']:
+                            
+                    flsobjects.append(objecte)
+                       
+                
+                
+                
+        except Exception as e:
+            print("getNonScalarEvents error",str(e))
+                
+        return flsobjects,totalcount,totalPages
 
     def getNonScalarConfig(self,signalid):
         #start=time.time()
