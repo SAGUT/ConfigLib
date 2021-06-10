@@ -13,8 +13,8 @@ class ChannelPlots(Base):
     channel_plot_report_id = Column(Integer, ForeignKey('tab_report.report_id'))
     channel_plot_channel_id = Column(Integer, ForeignKey('tab_channel_status.channel_status_channel_id'))
     channel_plot_plotfile= Column(String(255))
-    
-
+    channel_plot_caption= Column(String(255))
+    channel_plot_sequence= Column(Integer)
 
     # Lets us print out a user object conveniently.
     def __repr__(self):

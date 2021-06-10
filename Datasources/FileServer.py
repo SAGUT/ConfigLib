@@ -147,7 +147,8 @@ class FileServer(object):
                                     nonscalarfile_day= int(result['day']),
                                     nonscalarfile_hour = int(result['hour']),
                                     nonscalarfile_minute = int(result['minute']),
-                                    nonscalarfile_timestamp=result['timestamp'])
+                                    nonscalarfile_timestamp=result['timestamp'],
+                                    nonscalarfile_datatype=result['datatype'])
             applicationDict["dbconn"].upsertNonScalarFiles(storageresult)
             os.remove(p)
             conn.close()

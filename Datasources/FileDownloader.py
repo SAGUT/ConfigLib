@@ -37,9 +37,11 @@ class FileDownloader(object):
                 if "spectrumtype" in nonscalar:
                     result['type']=nonscalar['spectrumtype']
                     result['basedir']="spectra"
+                    result['datatype']="spectrum"
                 elif "TWFtype" in nonscalar:
                     result['type']=nonscalar['TWFtype']
                     result['basedir']="twf"
+                    result['datatype']="twf"
                 result['name']=name
                 result['filename']=filename
                 result['filelink']=target

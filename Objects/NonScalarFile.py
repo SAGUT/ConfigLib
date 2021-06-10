@@ -29,6 +29,7 @@ class NonScalarFile(Base):
     nonscalarfile_hour = Column(Integer, index=True)
     nonscalarfile_minute = Column(Integer, index=True)
     nonscalarfile_timestamp = Column(BigInteger, index=True)
+    nonscalarfile_datatype = Column(String(255))
     # Lets us print out a user object conveniently.
     def __repr__(self):
        return "<NonScalarFile(nonscalarfile_name='%s', nonscalarfile_type='%s', nonscalarfile_signal_id'%s')>" % (

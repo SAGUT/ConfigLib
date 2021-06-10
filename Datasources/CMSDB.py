@@ -1,7 +1,7 @@
 import json
 import logging
 from sqlalchemy import Column, Integer, String, ForeignKey, create_engine,update
-from sqlalchemy.sql import text
+from sqlalchemy.sql import text,desc,asc
 from sqlalchemy.orm import scoped_session,sessionmaker
 from sqlalchemy.sql.expression import table
 from ..LibFrame import applicationDict
@@ -29,6 +29,9 @@ from ..Objects.Reporting.ProjectReport import Report
 from ..Objects.Reporting.ChannelReport import ChannelStatus
 from ..Objects.Reporting.ChannelPlots import ChannelPlots
 from ..Objects.NonScalarFile import NonScalarFile
+from ..Objects.TWFAcquisition import TWFAcquisition
+from ..Objects.SpectrumAcquisition import SpectrumAcquisition
+from ..Objects.Reporting.ReportSummary import ReportSummary
 class CMSDB(object):
 
     def __init__(self):
@@ -71,7 +74,7 @@ class CMSDB(object):
     
     def getChannelPlots(self,report_id,channel_id):  
         querystr="channel_plot_report_id={0} and channel_plot_channel_id={1}".format(report_id,channel_id)
-        ssignals=db_session.query(ChannelPlots).filter(text(querystr)).all()
+        ssignals=db_session.query(ChannelPlots).filter(text(querystr)).order_by(ChannelPlots.channel_plot_sequence.asc()).all()
         
         return ssignals 
     #project handling
@@ -112,7 +115,11 @@ class CMSDB(object):
     
     def getChannel(self,channelid):
         return Channel.query.get(channelid)
-    
+
+    def getChannelsBySystemID(self,systemid):
+        channels=db_session.query(Channel).filter(Channel.channel_system_id==systemid)
+        return channels
+
     def getDDAUChannelsBySystemID(self,systemid):
         channels=db_session.query(DDAU3Channel).filter(DDAU3Channel.channel_system_id==systemid)
         return channels
@@ -196,11 +203,17 @@ class CMSDB(object):
         
     
     def updateCalculatedSignalChannel(self,signalid,channelid):
-        db_session.execute(update(CalculatedSignal).where(CalculatedSignal.signal_id ==signalid).values(signal_channel_id=channelid))
+        db_session.execute(update(CalculatedSignal).where(CalculatedSignal.signal_id == signalid).values(signal_channel_id=channelid))
         db_session.commit()
     
     def getCalculatedSignalsByChannel(self,channel_id):  
         querystr="signal_channel_id={0}".format(channel_id)
+        ssignals=db_session.query(CalculatedSignal).filter(text(querystr)).all()
+        
+        return ssignals 
+
+    def getCalculatedSignalsByChannelType(self,channel_id,datatype):  
+        querystr="signal_channel_id={0} and signal_signalType='{1}'".format(channel_id,datatype)
         ssignals=db_session.query(CalculatedSignal).filter(text(querystr)).all()
         
         return ssignals 
@@ -286,12 +299,21 @@ class CMSDB(object):
             result[server.spmcondmaster_name]=server
                 
         return result
+    
+    def getSPMServer(self,serverid):
+        querystr="spmcondmaster_id={0}".format(serverid,serverid)
+        db=db_session.query(SPMCondmasterServer).filter(text(querystr)).first()
+        return db
 
     def getSPMDatabaseByName(self,serverid,databasename):
         querystr="spmcondmasterdb_server={0} and spmcondmasterdb_name='{1}'".format(serverid,databasename)
         db=db_session.query(SPMCondmasterDB).filter(text(querystr)).first()
         return db
-
+    
+    def getSPMDatabase(self,spmcondmasterdb_id):
+        
+        db=db_session.query(SPMCondmasterDB).get(spmcondmasterdb_id)
+        return db
 
     def getSPMDatabases(self):
         logging.debug("query getSPMDatabases")
@@ -377,11 +399,12 @@ class CMSDB(object):
         and nonscalarfile_day={3} \
         and nonscalarfile_hour={4}".format(signal_id,year,month,day,hour)
         return db_session.query(NonScalarFile).filter(text(querystr)).first()
-        
+    
+    def getLastNonScalarFileByType(self,signal_id,datatype):
+        querystr="nonscalarfile_signal_id={0} and nonscalarfile_datatype='{1}'".format(signal_id,datatype)
+        return db_session.query(NonScalarFile).filter(text(querystr)).order_by(desc('nonscalarfile_id')).first()
         
     def upsertNonScalarFiles(self,nonscalfile):
-        
-
         querystr="nonscalarfile_signal_id={0} and nonscalarfile_timestamp={1}".format(nonscalfile.nonscalarfile_signal_id,nonscalfile.nonscalarfile_timestamp)
         logging.debug(querystr)
         dbresult =  db_session.query(NonScalarFile).filter(text(querystr)).first()
@@ -457,3 +480,34 @@ class CMSDB(object):
             logging.debug("not mapped: "+str(mapping_short))
             mapped=mapping_short
         return mapped 
+
+
+    def deleteTwfAcqusition(self,signal_id):
+        querystr="twfacq_signal_id={0}".format(signal_id)
+        db_session.query(TWFAcquisition).filter(text(querystr)).delete(synchronize_session=False)
+        db_session.commit()
+    
+    def addTwfAcqusition(self,twfacquisition):
+        db_session.add(twfacquisition)
+        db_session.commit()
+        return twfacquisition
+    
+    def getTwfAcqusition(self,signal_id):
+        querystr="twfacq_signal_id={0}".format(signal_id)
+        twfac=db_session.query(TWFAcquisition).filter(text(querystr)).first()
+        return twfac
+
+    def getNonScalConfig(self,signal_id):
+        querystr="scalarconfig_signal_id={0}".format(signal_id)
+        twfac=db_session.query(NonScalarConfig).filter(text(querystr)).all()
+        return twfac
+
+    def getSPMAssignment(self,spm_dbid,techid):
+        querystr="spmcondmasterfftas_dbid={0} and spmcondmasterfftas_techid='{1}'".format(spm_dbid,techid)
+        twfac=db_session.query(SPMCondmasterFFTAS).filter(text(querystr)).first()
+        return twfac
+
+    def getSummaryEntry(self,report_id):
+        querystr="repsummary_report_id={0}".format(report_id)
+        summary=db_session.query(ReportSummary).filter(text(querystr)).first()
+        return summary
