@@ -69,7 +69,7 @@ class CMSDB(object):
         return Report.query.get(report_id)
     
     def getChannelsStatus(self,report_id):
-        channelsstatus=db_session.query(ChannelStatus).filter(ChannelStatus.channel_status_report_id==report_id)
+        channelsstatus=db_session.query(ChannelStatus).filter(ChannelStatus.channel_status_report_id==report_id).order_by(ChannelStatus.channel_status_channel_id.asc())
         return channelsstatus
     
     def getChannelPlots(self,report_id,channel_id):  
